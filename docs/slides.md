@@ -41,11 +41,11 @@ layout: true
 ### Part 1 (09:35): The Aphroditi HPC system
 - System overview: CPU and GPU resources
 - Architecture of the RTX partition's CPUs and GPUs
-- Using Aphroditi: logging in, the job scheduler, the build environment
+- Using Aphroditi: logging in, the job scheduler, the build environment, batch jobs
 
 ### Part 2 (10:00): Running GPU workloads on HPC systems
 - How work is organised on a GPU: threads and blocks
-- Batch scripts and requesting GPU resources
+- Requesting CPU and GPU resources in batch scripts
 - Hands-on: CPU vs GPU performance, and using the GPU efficiently
 
 --
@@ -593,6 +593,159 @@ p01  prog-01.c
 - Now try two nodes, four processes in total (`-N 2 -n 4`). On which nodes did your processes run?
 
 ---
+template: normal
+
+# Using Aphroditi: Batch Jobs
+
+- So far we have been running .blue[_interactively_]: `srun` waits for a node, runs the program, and prints its output .blue[_on the screen, in real time_]. The terminal is blocked until the program finishes
+
+--
+
+- On an HPC system most work is done via .blue[_batch jobs_]:
+
+--
+
+	- Write the commands into a shell script, the .blue[_job script_], and submit it with `sbatch`
+
+--
+
+	- `sbatch` returns immediately. Slurm runs the script .blue[_in the background_] on a compute node, once the requested resources become available
+
+--
+
+	- In the meantime you can do other work, or even log out
+
+--
+
+	- Since the job does not run in your terminal, its output .red[is not printed on the screen]. It is .blue[_redirected to files_], which you can inspect once the job is done
+
+--
+
+- Copy the job script for `p01` from our shared space:
+```zsh
+[ikoutsou@front01 01]$ cp /onyx/data/edu30/01/prog-01.sh .
+[ikoutsou@front01 01]$ ls
+p01  prog-01.c  prog-01.sh
+```
+
+---
+template: normal
+
+# Using Aphroditi: Batch Jobs
+
+.left-column[
+.small[
+```sh
+#!/bin/bash
+#SBATCH -J prog-01
+#SBATCH -o prog-01.txt
+#SBATCH -e prog-01.err
+#SBATCH -p rtx
+#SBATCH -A edu30
+#SBATCH --reservation=edu30
+#SBATCH -t 00:01:00
+#SBATCH -N 1
+#SBATCH -n 4
+#SBATCH --gres=gpu:1
+
+echo " Job ID:      $SLURM_JOB_ID"
+echo " Node(s):     $SLURM_JOB_NODELIST"
+echo " Processes:   $SLURM_NTASKS"
+
+srun ./p01
+```
+]
+]
+
+.right-column[
+- Lines starting with `#SBATCH` are read by Slurm (bash ignores them as comments). They take the same options as `srun`
+
+- Already seen: `-p`, `-A`, `--reservation`, `-N`, `-n`, `--gres`
+
+- New:
+	- `-J`: a name for the job
+	- `-o`: file for the output, i.e. what `srun` would print on the screen
+	- `-e`: file for any error messages
+	- `-t`: maximum run time (here 1 minute). The job is stopped if it runs longer
+
+- `srun ./p01`: runs `p01` with the resources requested in the `#SBATCH` lines; no need to repeat them
+]
+
+---
+template: normal
+
+# Using Aphroditi: Batch Jobs
+
+- Inside a job, Slurm sets .blue[_environment variables_] that describe the job. Some examples:
+
+--
+
+| Variable | Contains |
+|:---|:---|
+| `SLURM_JOB_ID` | the job's ID number |
+| `SLURM_JOB_NODELIST` | the node(s) allocated to the job |
+| `SLURM_NTASKS` | the number of processes (`-n`) |
+| `SLURM_CPUS_PER_TASK` | the number of CPU cores per process (`--cpus-per-task`, see Part 2) |
+
+--
+
+- `prog-01.sh` prints the first three with `echo`. It is good practice to record in the output which job ran and where
+
+--
+
+- They can also be passed to programs, so that the script uses exactly the resources it asked for, without typing the numbers twice. We will do this in Part 2
+
+---
+template: normal
+
+# Using Aphroditi: Batch Jobs
+
+- Submit the job script with `sbatch`. The prompt returns immediately:
+```zsh
+[ikoutsou@front01 01]$ sbatch prog-01.sh
+Submitted batch job 411280
+```
+
+--
+
+- Check the status of your jobs with `squeue`:
+```zsh
+[ikoutsou@front01 01]$ squeue -u $USER
+             JOBID PARTITION     NAME     USER ST       TIME  NODES NODELIST(REASON)
+            411280       rtx  prog-01 ikoutsou  R       0:01      1 rtx6001
+```
+`ST` is the state: `PD` pending (waiting for resources), `R` running, `CG` completing.
+> - This job is very short, so it may already be gone
+> - Once a job is finished it no longer appears in `squeue`
+
+---
+template: normal
+
+# Using Aphroditi: Batch Jobs
+
+- Once the job is done, the output is in the files given by `-o` and `-e`:
+```zsh
+[ikoutsou@front01 01]$ ls
+p01  prog-01.c  prog-01.err  prog-01.sh  prog-01.txt
+[ikoutsou@front01 01]$ cat prog-01.txt
+ Job ID:      411280
+ Node(s):     rtx6001
+ Processes:   4
+ Hostname: rtx6001, pid: 1907394
+ Hostname: rtx6001, pid: 1907396
+ Hostname: rtx6001, pid: 1907397
+ Hostname: rtx6001, pid: 1907395
+```
+`prog-01.err` is empty, since there were no errors
+
+--
+> - Compare with `srun -N 1 -n 4 ... ./p01` earlier: the same `Hostname` lines, but they were written to `prog-01.txt` instead of the screen
+
+--
+
+- Try: edit `prog-01.sh` (`nano prog-01.sh`), change `-n 4` to `-n 8`, submit again, and check `prog-01.txt`
+
+---
 # Summary of Part 1
 
 ### Outline of major points covered
@@ -601,7 +754,7 @@ p01  prog-01.c
 
 - Job scheduling system for reserving and running on compute nodes
 
-- Interactive jobs (`salloc`, `srun`)
+- Interactive jobs (`salloc`, `srun`) and batch jobs (`sbatch`, `squeue`)
 
 - Modules system for selecting build environment
 
@@ -886,17 +1039,7 @@ axpy(long n, float a, float *x, float *y)
 
 --
 
-- We will now run using a .blue[_Slurm batch script_] as opposed to
-  running .blue[_interactively_] which we have been doing so far
-
---
-
-- A batch script is a shell script that Slurm runs for us on a compute
-  node, once the resources we ask for become available
-
---
-
-- We submit it, and can then log out or do other work; the output is written to a file
+- As with `prog-01.sh` in Part 1, we will run it via a .blue[_batch script_], submitted with `sbatch`
 
 ---
 # Example 1: `axpy-cpu`
@@ -929,54 +1072,24 @@ srun --cpus-per-task=$SLURM_CPUS_PER_TASK ./axpy-cpu $N
 
 --
 
-- The lines starting with `#SBATCH` are parsed by Slurm, even though
-  they are ignored as comments by bash. The options are the same as you would pass to `srun`
+- Same `#SBATCH` options as `prog-01.sh`, except: `-n 1` (one process), `-t` 5 minutes, and
 
 --
 
-- `-J`: job name; `-o` and `-e`: files for output and errors; `-t`: maximum run time (5 minutes)
+- `--cpus-per-task=8`: reserve 8 CPU cores for the process (one GPU's share of a node; the GPU is required by the `rtx` partition, but not used here)
 
---
-
-- `--cpus-per-task=8`: reserve 8 CPU cores (one GPU's share of a node; the GPU is required by the `rtx` partition, but not used here)
-
-- `srun --cpus-per-task=$SLURM_CPUS_PER_TASK`: run the program on those 8 cores. `OMP_PLACES`, `OMP_PROC_BIND`: keep each thread on its own core
+- `srun --cpus-per-task=$SLURM_CPUS_PER_TASK`: run the program on those 8 cores, using the Slurm variable rather than typing 8 again. `OMP_PLACES`, `OMP_PROC_BIND`: keep each thread on its own core
 
 ---
 # Example 1: `axpy-cpu`
 
-- Submit the script via `sbatch`:
+- Submit with `sbatch`, check with `squeue -u $USER` until the job is gone, then look at the output in `axpy-cpu.txt` (errors, if any, in `axpy-cpu.err`):
 ```sh
 [ikoutsou@front01 02]$ sbatch axpy-cpu.sh
 Submitted batch job 411152
-```
-
---
-
-- Check status via `squeue`:
-```sh
 [ikoutsou@front01 02]$ squeue -u $USER
              JOBID PARTITION     NAME     USER ST       TIME  NODES NODELIST(REASON)
             411152       rtx axpy-cpu ikoutsou  R       0:01      1 rtx6001
-```
-
---
-
-- `R` means "Running". You may see `PD` for "Pending" (not yet
-  running) or `CG` for "Completing"
-
---
-
-- When the job has finished, `squeue -u $USER` should not show any jobs
-
---
-
-- The output is now in `axpy-cpu.txt` (which was specified in the batch script). Any errors will be in `axpy-cpu.err`
-
---
-
-- Check the output:
-```sh
 [ikoutsou@front01 02]$ cat axpy-cpu.txt
  CPU: nthr =    1   t0 =   0.010564 sec   P =     12.705 Gflop/s   B =     76.231 GB/s
 ```
@@ -993,15 +1106,16 @@ Submitted batch job 411152
 --
 
 - What I got:
-
-.small[
 ```
- CPU: nthr =    1   t0 =   0.010564 sec   P =     12.705 Gflop/s   B =     76.231 GB/s
+CPU: nthr =    1   t0 =   0.010564 sec   P =     12.705 Gflop/s   B =     76.231 GB/s
  CPU: nthr =    2   t0 =   0.007437 sec   P =     18.047 Gflop/s   B =    108.284 GB/s
  CPU: nthr =    4   t0 =   0.007253 sec   P =     18.505 Gflop/s   B =    111.032 GB/s
  CPU: nthr =    8   t0 =   0.007277 sec   P =     18.444 Gflop/s   B =    110.665 GB/s
 ```
-]
+
+
+
+
 
 --
 
@@ -1040,7 +1154,6 @@ axpy-gpu.cu  axpy-gpu.sh
   - reports the difference between the CPU and GPU results (`Diff`), which should be very small
 
 --
-
 - Two command-line arguments: the vector length `N`, and the number of GPU threads per block `NTHR`
 
 ---
@@ -1070,19 +1183,15 @@ and how it is called:
 ```
 
 --
-
 - `nthr` threads per block, taken from the command line
 
 --
-
 - `nblck` blocks: enough blocks so that `nblck`$\times$`nthr` $\ge$ `n`
 
 --
-
 - `idx`: each thread computes which element it is responsible for, from its block and thread index (recall the threads/blocks slides)
 
 --
-
 - `if(idx < n)`: the last block may have more threads than remaining elements
 
 ---
@@ -1171,7 +1280,6 @@ Submitted batch job 411156
 - $\ge$128 threads per block: $\sim$1.5 TB/s, i.e. $\sim$83% of the peak bandwidth
 
 --
-
 - Try `NTHR=2048`. What happens? (Recall the max. number of threads per block)
 
 ---
