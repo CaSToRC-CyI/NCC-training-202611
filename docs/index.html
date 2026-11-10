@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Introduction to GPU Computing on HPC Systems // November 2026</title>
+    <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <style type="text/css">
+      @import url(https://fonts.googleapis.com/css?family=Oswald);
+      @import url(https://fonts.googleapis.com/css?family=Lato:300,400,700);
+      @import url(https://fonts.googleapis.com/css?family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&display=swap);
+      @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400&display=swap');
+      @page {
+  	  size: 1365px 768px;
+	  margin: 0;
+      }
+      @media print {
+	  .remark-slide-scaler {
+	      width: 100% !important;
+	      height: 100% !important;
+	      transform: scale(1) !important;
+	      top: 0 !important;
+	      left: 0 !important;
+	  }
+      } 
+
+      div.my-footer {
+	  border-top: 0.2px solid #aaa;
+	  font-size: 10pt;
+	  text-align: center;
+	  position: fixed;
+	  bottom: 0px;
+	  left: 0px;
+	  height: 30px;
+	  width: 100%;
+      }
+      
+      div.my-footer p {
+  	  font-family: Fira Code;
+          font-size: 8pt;
+          opacity: 0.2;
+	  margin-top: 1px;
+	  height: 1px;
+      }
+      
+      .remark-slide-content {
+	  /* background: linear-gradient(0deg, #282828 85%, #FF5151 85%);*/
+	  /* Start #282828 from 85%. Start #FF5151 at 85% and end at 100% */
+	  background: #282828;
+	  font-size: 13pt;
+      }
+      
+      a, a:visited {
+	  color: #21ACF8;
+      }
+
+      a:hover {
+	  color: #9ACFFF;
+      }
+      
+      body {
+	  font-family: Lato;
+	  font-size: 100%;
+	  color: #dadada;	  
+	  font-weight: 400;
+	  line-height: 1.5em;
+      }
+
+      table {
+	  border-collapse: collapse;
+	  width: 100%;
+      }
+
+      th {
+	  font-weight: 1200;
+	  background-color: #d0d0d0;
+	  color: #0a0a0a;
+      }
+
+      th, td {
+	  text-align: center;
+	  padding: 2px;
+      }
+
+      tr:nth-child(even) {background-color: #505050;}
+
+      li {
+	  margin: 6pt 0;
+	  line-height: 1em;
+      }
+      
+      .red {
+	  color: #FF5151;
+      }
+      
+      .green {
+	  color: #92BF78;
+      }
+
+      .blue {
+	  color: #6AB0EE;
+      }
+
+      h1, h2 {
+          font-family: 'Oswald';
+      }
+
+      h1 {
+          margin-bottom: 1em;
+      }
+
+      h2 {
+          margin-bottom: 0em;
+      }
+
+      h3 {
+	  line-height: 1.2em;
+      }
+      
+      h3, h4 {
+          font-family: 'Lato';
+          font-weight: 600;
+          margin-bottom: 0;
+      }
+
+      .remark-slide-content h1 { font-size: 36pt; }
+      .remark-slide-content h2 { font-size: 24pt; }
+      .remark-slide-content h3 { font-size: 18pt; }
+      .remark-slide-content h4 { font-size: 16pt; }
+
+      .remark-code, .remark-inline-code, .code {
+          font-family: Fira Code;
+          font-size: 80%;
+          color: #c5c8c6;
+	  background-color: #1D1F21;
+      }
+      
+      .remark-code {
+	  line-height: 1.2em;	  
+      }
+
+      code {
+	  border-radius: 3px;
+      }
+
+      
+      .small {
+	  font-size: 85%;
+      }
+      
+      .smaller {
+	  font-size: 65%;
+      }
+
+      .smallerer {
+	  font-size: 60%;
+      }
+      
+      .tiny {
+	  font-size: 50%;
+      }      
+
+      .speaker {
+  	  font-family: Lato;
+	  font-size: 13pt;
+          font-weight: 400;
+          line-height: 1em;
+      }
+
+      .venue {
+	  font-family: Lato;
+	  font-size: 18pt;
+	  font-weight: 300;
+          line-height: 1.6em;
+      }
+      
+      .sub {
+  	  font-family: Lato;
+	  font-size: 11pt;
+	  font-weight: 300;
+	  line-height: 1.2em;
+      }
+      
+      .remark-slide-number {
+  	  font-family: Fira Code;
+          font-size: 8pt;
+          opacity: 0.2;
+      }
+
+      .remark-slide-content.no-footer .remark-slide-number,
+      .remark-slide-content.no-footer .footer {
+	  display: none;
+      }
+
+      .remark-code-line-highlighted {
+	  background-color: #373832;
+      }
+      
+      .sn {
+	  font-family: Oswald;
+	  font-size: 1em;
+	  font-weight: bold;
+	  color: #3a3d3b;
+      }
+
+      /*
+      .center {
+	  width: 100%;
+	  float: center;
+	  margin-left: auto;
+	  margin-right: auto;
+      }
+     */
+
+      .logo {
+	  width: 100%;
+	  float: center;
+          vertical-align: bottom;
+      }
+      .one-column {
+	  width: 100%;
+	  float: left;
+      }
+
+      /* Two-column layouts */
+      .left-column {
+	  width: 48%;
+	  float: left;
+      }
+      
+      .right-column {
+	  width: 48%;
+	  float: right;
+      }
+      
+      .left-column-65 {
+	  width: 64%;
+	  float: left;
+      }
+      
+      .right-column-65 {
+	  width: 64%;
+	  float: right;
+      }
+      
+      .left-column-55 {
+	  width: 54%;
+	  float: left;
+      }
+      
+      .right-column-55 {
+	  width: 54%;
+	  float: right;
+      }
+      
+      .left-column-45 {
+	  width: 44%;
+	  float: left;
+      }
+      
+      .right-column-45 {
+	  width: 44%;
+	  float: right;
+      }
+      
+      .left-column-35 {
+	  width: 34%;
+	  float: left;
+      }
+      
+      .right-column-35 {
+	  width: 34%;
+	  float: right;
+      }
+      
+      .left-column-40 {
+	  width: 39%;
+	  float: left;
+      }
+      
+      .right-column-40 {
+	  width: 39%;
+	  float: right;
+      }
+      
+      .left-column-30 {
+	  width: 29%;
+	  float: left;
+      }
+      
+      .right-column-30 {
+	  width: 29%;
+	  float: right;
+      }
+      
+      .left-column-20 {
+	  width: 19%;
+	  float: left;
+      }
+      
+      .right-column-20 {
+	  width: 19%;
+	  float: right;
+      }
+      
+      .left-column-5 {
+	  width: 4%;
+	  float: left;
+      }
+      
+      .right-column-5 {
+	  width: 4%;
+	  float: right;
+      }
+      
+      .left-column-60 {
+	  width: 59%;
+	  float: left;
+      }
+      
+      .right-column-60 {
+	  width: 59%;
+	  float: right;
+      }
+      
+      .left-column-70 {
+	  width: 69%;
+	  float: left;
+      }
+      
+      .right-column-70 {
+	  width: 69%;
+	  float: right;
+      }
+
+      .column-thrd {
+	  width: 33.3%;
+	  float: left;
+      }
+      
+    </style>
+  </head>
+  <body>    
+    <!-- MathJax v3 -->
+    <!--
+      <script>
+      MathJax = {
+	  loader: {load: ['[tex]/ams', 'input/tex', 'output/chtml']},
+	  tex: {
+	      inlineMath: [              // start/end delimiter pairs for in-line math
+		  ['\\(', '\\)'],
+		  ['$', '$']
+	      ],
+	      packages: {'[+]': ['ams']},        // extensions to use
+	      displayMath: [             // start/end delimiter pairs for display math
+                  ['$$', '$$'],
+		  ['\\[', '\\]']
+	      ],	      
+	      processEscapes: true,      // use \$ to produce a literal dollar sign
+	      processEnvironments: true, // process \begin{xxx}...\end{xxx} outside math mode
+	      processRefs: true,         // process \ref{...} outside of math mode
+	      digits: /^(?:[0-9]+(?:\{,\}[0-9]{3})*(?:\.[0-9]*)?|\.[0-9]+)/,
+	      // pattern for recognizing numbers
+	      tags: 'none',              // or 'ams' or 'all'
+	      tagSide: 'right',          // side for \tag macros
+	      tagIndent: '0.8em',        // amount to indent tags
+	      useLabelIds: true,         // use label name rather than tag for ids
+	      maxMacros: 1000,           // maximum number of macro substitutions per expression
+	      maxBuffer: 5 * 1024,       // maximum size for the internal TeX string (5K)
+	      formatError:               // function called when TeX syntax errors occur
+	      (jax, err) => jax.formatError(err)
+	  },
+	  chtml: {
+	      scale: 1,                      // global scaling factor for all expressions
+	      minScale: .5,                  // smallest scaling factor to use
+	      mtextInheritFont: false,       // true to make mtext elements use surrounding font
+	      merrorInheritFont: true,       // true to make merror text use surrounding font
+	      mathmlSpacing: false,          // true for MathML spacing rules, false for TeX rules
+	      skipAttributes: {},            // RFDa and other attributes NOT to copy to the output
+	      exFactor: .5,                  // default size of ex in em units
+	      displayAlign: 'center',        // default for indentalign when set to 'auto'
+	      displayIndent: '0',            // default for indentshift when set to 'auto'
+	      matchFontHeight: true,         // true to match ex-height of surrounding font
+	      fontURL: 'https://github.com/aliftype/euler-otf/blob/master/euler.otf?raw=true',   // The URL where the fonts are found
+	      adaptiveCSS: true              // true means only produce CSS that is used in the processed equations
+	  }	  
+      };
+    </script>
+    <script id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    -->
+    <!-- MathJax v2 -->
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@2/MathJax.js?config=TeX-AMS_HTML&delayStartupUntil=configured">
+    </script>
+    <script type="text/javascript">
+      MathJax.Hub.Config({
+          tex2jax: {inlineMath: [ ['$','$'], ["\\(","\\)"] ]},
+	  "HTML-CSS": {availableFonts: [], webFont: "Neo-Euler"}
+      });
+      
+      MathJax.Hub.Configured();
+    </script>
+    <script src="https://remarkjs.com/downloads/remark-latest.min.js">
+    </script>
+    
+    <script type="text/javascript">
+      var slideshow = remark.create({
+          countIncrementalSlides: false,
+	  ratio: '16:9',
+          navigation: {
+              scroll: false
+          },
+          sourceUrl: 'slides.md',
+          highlightStyle: 'tomorrow-night'
+      });
+    </script>
+    
+    <script type="text/javascript">
+      MathJax.Hub.Queue(["Typeset",MathJax.Hub])
+    </script>
+  </body>
+</html>
