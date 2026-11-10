@@ -209,6 +209,10 @@ template: normal
 
 --
 
+	$\Rightarrow$ [https://ood.hpcf.cyi.ac.cy/pun/sys/shell/ssh/default](https://ood.hpcf.cyi.ac.cy/pun/sys/shell/ssh/default)
+
+--
+
 - Type `hostname`. This tells you the name of the node you are currently logged into:
 ```zsh
 [ikoutsou@front01 ~]$ hostname
@@ -418,22 +422,21 @@ template: normal
 # Using Aphroditi: Introductory Example
 
 ```c
-#include <unistd.h>           
-#include <stdio.h>            
-#include <sys/types.h>        
+#include <unistd.h>
+#include <stdio.h>
+#include <sys/types.h>
 
 
 
 int
 main(int argc, char *argv[])
 {
-  char hname[256];         
-  pid_t p;                 
-  gethostname(hname, 256); 
-  p = getpid();            
-  printf(" Hostname: %s, pid: %lu\n", hname, p); 
-  return 0; 
-            
+  char hname[256];
+  pid_t p;
+  gethostname(hname, 256);
+  p = getpid();
+  printf(" Hostname: %s, pid: %lu\n", hname, p);
+  return 0;
 }
 ```
 
@@ -446,9 +449,9 @@ template: normal
 #include <unistd.h>           // <-- provides definitions for gethostname() and getpid()
 #include <stdio.h>            // <-- provides definitions for printf()
 #include <sys/types.h>        // <-- defines the pid_t type 
-// main()
-//   -> argv[] is an array of strings which holds all command line arguments
-//   -> argc holds the number of elements of argv
+
+
+
 int
 main(int argc, char *argv[])
 {
@@ -458,7 +461,6 @@ main(int argc, char *argv[])
   p = getpid();            // <-- call getpid(), return value in p
   printf(" Hostname: %s, pid: %lu\n", hname, p); // print statement
   return 0; // <-- return a value of 0 to the operating system. By convention 0 means success.
-            //     Non zero values indicate errors.
 }
 ```
 
