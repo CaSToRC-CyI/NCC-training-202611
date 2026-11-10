@@ -107,7 +107,7 @@ main(int argc, char *argv[])
   double n_flop = 2;
   double n_io = 3*sizeof(float);
   int nthr = omp_get_max_threads();
-  printf(" CPU: nthr = %4d   t0 = %8.6lf sec   P = %8.3lf Gflop/s   B = %8.3lf GB/s\n",
+  printf(" CPU: nthr = %4d   t0 = %10.6lf sec   P = %10.3lf Gflop/s   B = %10.3lf GB/s\n",
          nthr, t0, n_flop*n/1e9/t0, n_io*n/1e9/t0);
 
   free(x);

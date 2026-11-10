@@ -144,7 +144,7 @@ main(int argc, char *argv[])
     t0 = stop_watch(t0)/NREP;
 
     int ncpu = omp_get_max_threads();
-    printf(" CPU: nthr = %4d                    t0 = %8.6lf sec   P = %8.3lf Gflop/s   B = %8.3lf GB/s\n",
+    printf(" CPU: nthr = %4d                        t0 = %10.6lf sec   P = %10.3lf Gflop/s   B = %10.3lf GB/s\n",
            ncpu, t0, n_flop*n/1e9/t0, n_io*n/1e9/t0);
   }
 
@@ -178,7 +178,7 @@ main(int argc, char *argv[])
     cudaDeviceSynchronize();
     t0 = stop_watch(t0)/NREP;
 
-    printf(" GPU: nthr = %4d   nblck = %9ld   t0 = %8.6lf sec   P = %8.3lf Gflop/s   B = %8.3lf GB/s\n",
+    printf(" GPU: nthr = %4d   nblck = %10ld   t0 = %10.6lf sec   P = %10.3lf Gflop/s   B = %10.3lf GB/s\n",
            nthr, nblck, t0, n_flop*n/1e9/t0, n_io*n/1e9/t0);
 
     /* Copy y1 back from the GPU and free GPU memory */
