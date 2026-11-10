@@ -1106,8 +1106,9 @@ Submitted batch job 411152
 --
 
 - What I got:
-```
-CPU: nthr =    1   t0 =   0.010564 sec   P =     12.705 Gflop/s   B =     76.231 GB/s
+
+```shell
+ CPU: nthr =    1   t0 =   0.010564 sec   P =     12.705 Gflop/s   B =     76.231 GB/s
  CPU: nthr =    2   t0 =   0.007437 sec   P =     18.047 Gflop/s   B =    108.284 GB/s
  CPU: nthr =    4   t0 =   0.007253 sec   P =     18.505 Gflop/s   B =    111.032 GB/s
  CPU: nthr =    8   t0 =   0.007277 sec   P =     18.444 Gflop/s   B =    110.665 GB/s
@@ -1263,15 +1264,14 @@ Submitted batch job 411156
 
 - What I got:
 
-.small[
-```
+```shell
  GPU: nthr =    1   nblck =   67108864   t0 =   0.038189 sec   P =      3.515 Gflop/s   B =     21.087 GB/s
  GPU: nthr =   32   nblck =    2097152   t0 =   0.001197 sec   P =    112.099 Gflop/s   B =    672.594 GB/s
  GPU: nthr =  128   nblck =     524288   t0 =   0.000539 sec   P =    248.818 Gflop/s   B =   1492.906 GB/s
  GPU: nthr =  512   nblck =     131072   t0 =   0.000539 sec   P =    249.016 Gflop/s   B =   1494.095 GB/s
  GPU: nthr = 1024   nblck =      65536   t0 =   0.000545 sec   P =    246.324 Gflop/s   B =   1477.947 GB/s
 ```
-]
+
 
 --
 
